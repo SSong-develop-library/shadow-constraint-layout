@@ -2,7 +2,7 @@ package com.hk.customcardview.util
 
 import android.app.Application
 import androidx.annotation.Px
-import com.hk.customcardview.MainApplication
+import com.kr.hkslibrary.shadowconstraintlayout.MainApplication
 import kotlin.math.roundToInt
 
 class PixelRatio(private val app: Application) {

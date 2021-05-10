@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import com.hk.customcardview.util.dpToPixelFloat
 import com.kr.hkslibrary.shadowconstraintlayout.R
@@ -116,6 +117,7 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     private val blurMaskFilter = BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL)
 
     init {
+        setBackgroundColor(Color.WHITE)
         if (attrs != null) {
             getStyleableAttrs(attrs)
         }
@@ -242,7 +244,7 @@ class ShadowConstraintLayout @JvmOverloads constructor(
 
         // provide a rect
         borderRectF.apply {
-            top = height - borderHeight
+            top = 0f
             left = 0f
             right = width.toFloat()
             bottom = height.toFloat()
@@ -280,7 +282,7 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     private fun drawRectBackground(canvas: Canvas) {
         rectPaint.apply {
             style = Paint.Style.FILL
-            color = Color.WHITE
+            color = ContextCompat.getColor(context,R.color.real_white)
             xfermode = porterDuffXfermode // To ensure the paint should come on top of shadow
         }
 
