@@ -2,6 +2,7 @@ package com.hk.customcardview.shadowconstraint
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -9,8 +10,11 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.hk.customcardview.util.dpToPixelFloat
 import com.kr.hkslibrary.shadowconstraintlayout.R
+import com.kr.hkslibrary.shadowconstraintlayout.util.OnChangeProp
 import java.lang.Float.MIN_VALUE
 
 /**
@@ -68,14 +72,15 @@ import java.lang.Float.MIN_VALUE
  * 사용법
  * : 기존 elevation을 보여주듯이 보여주면 되는데 clipChildren 과 clipToPadding 을 false로 적용해줘야 합니다.
  * : 그 후 뭐.....원하는 cornerRadius나 blurRadius를 처리하면 끝!
+ *
+ * background 그리는걸 MaterialShapeAppearance로 처리를 한다면 어떨까라는 생각으로 시작합니다.
+ *
+ * app :background를 바꿔줄 수 있는 xml 속성을 해놔야 할 거 같습니다.
  */
 class ShadowConstraintLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : ConstraintLayout(context, attrs) {
-    // default Shadow Color
-    private var defaultShadowColor = Color.GRAY
-
     // Paint
     private val shadowPaint = Paint()
     private var borderPaint = Paint()
@@ -95,7 +100,7 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     // That's why we used PorterDuffXfermode
     private val porterDuffXfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
-    private var shadowColor = defaultShadowColor
+    private var shadowColor = Color.GRAY
 
     // stroke Width
     private var shadowStrokeWidth = 15.toFloat()
@@ -110,7 +115,11 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     private var enableShadow = true
     private var enableBorder = true
     private var borderHeight = 0f
-    private var cornerRadius = 16f
+
+    // background Corner Radius
+    var cornerRadius by OnChangeProp(16.dpToPixelFloat){
+        updateBackground()
+    }
 
     // blurMask
     // that's why we have used blurMaskFilter
@@ -166,8 +175,8 @@ class ShadowConstraintLayout @JvmOverloads constructor(
         }
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    private fun updateBackground(){
+        background = MaterialShapeDrawable(ShapeAppearanceModel().withCornerSize(cornerRadius))
     }
 
     override fun dispatchDraw(canvas: Canvas) {
