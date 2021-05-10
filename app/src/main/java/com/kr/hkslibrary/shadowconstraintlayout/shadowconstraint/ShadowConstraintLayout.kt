@@ -75,7 +75,7 @@ import java.lang.Float.MIN_VALUE
  *
  * background 그리는걸 MaterialShapeAppearance로 처리를 한다면 어떨까라는 생각으로 시작합니다.
  *
- * app :background를 바꿔줄 수 있는 xml 속성을 해놔야 할 거 같습니다.
+ * todo app :background를 바꿔줄 수 있는 xml 속성을 해놔야 할 거 같습니다.
  */
 class ShadowConstraintLayout @JvmOverloads constructor(
     context: Context,
