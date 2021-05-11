@@ -115,7 +115,6 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     }
 
     init {
-        setBackgroundColor(Color.WHITE)
         if (attrs != null) {
             getStyleableAttrs(attrs)
         }
