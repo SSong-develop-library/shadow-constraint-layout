@@ -159,7 +159,6 @@ class ShadowConstraintLayout @JvmOverloads constructor(
             )
             enableShadow = it.getBoolean(R.styleable.ShadowConstraintLayout_enable_shadow, true)
             enableBorder = it.getBoolean(R.styleable.ShadowConstraintLayout_enable_border, false)
-            borderHeight = it.getDimension(R.styleable.ShadowConstraintLayout_border_height, 0f)
             cardBackgroundColor = it.getColor(R.styleable.ShadowConstraintLayout_card_background_color,Color.WHITE)
         }
     }

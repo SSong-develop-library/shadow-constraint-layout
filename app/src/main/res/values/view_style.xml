@@ -13,6 +13,5 @@
         <attr name="blur_radius" format="dimension" />
         <attr name="enable_shadow" format="boolean" />
         <attr name="enable_border" format="boolean" />
-        <attr name="border_height" format="dimension" />
     </declare-styleable>
 </resources>
