@@ -1,21 +1,16 @@
-package com.hk.customcardview.shadowconstraint
+package com.kr.hkslibrary.shadowconstraintlayout.shadowconstraint
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.hk.customcardview.util.dpToPixelFloat
 import com.kr.hkslibrary.shadowconstraintlayout.R
 import com.kr.hkslibrary.shadowconstraintlayout.util.OnChangeProp
-import java.lang.Float.MIN_VALUE
 
 /**
  * Shadow ConstraintLayout
@@ -75,139 +70,120 @@ import java.lang.Float.MIN_VALUE
  *
  * background 그리는걸 MaterialShapeAppearance로 처리를 한다면 어떨까라는 생각으로 시작합니다.
  *
- * todo app :background를 바꿔줄 수 있는 xml 속성을 해놔야 할 거 같습니다.
  */
 class ShadowConstraintLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : ConstraintLayout(context, attrs) {
-    // Paint
     private val shadowPaint = Paint()
     private var borderPaint = Paint()
-    private var rectPaint = Paint()
+    private val rectPaint = Paint()
 
-    // To give a path to shadow and that is around the view like a RECTANGLE
     private val shadowPath = Path()
-    private var rectBackgroundPath = Path()
-    private var clipPath = Path()
+    private val rectBackgroundPath = Path()
 
-    // RectF
-    private var borderRectF = RectF()
-    private var clipRectF = RectF()
-    private var rectBackgroundRectF = RectF()
+    private val borderRectF = RectF()
+    private val rectBackgroundRectF = RectF()
+    private val shadowRectF = RectF()
 
-    // The Shadow should not overlap the content of your constraint layout
-    // That's why we used PorterDuffXfermode
     private val porterDuffXfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
     private var shadowColor = Color.GRAY
 
-    // stroke Width
-    private var shadowStrokeWidth = 15.toFloat()
+    private var shadowStrokeWidth = 4.dpToPixelFloat
 
     // values & Offset & width & height
-    private var blurRadius = 40.toFloat() // 50 is pixel
-    private var shadowStartY = MIN_VALUE
-    private var shadowEndOffset = 0f
-    private var shadowStartOffset = 0f
-    private var shadowTopOffset = 0f
-    private var shadowBottomOffset = 0f
+    private var blurRadius = 16.dpToPixelFloat // 50 is pixel
+    private var shadowEndOffset = 1.dpToPixelFloat
+    private var shadowStartOffset = 1.dpToPixelFloat
+    private var shadowTopOffset = 1.dpToPixelFloat
+    private var shadowBottomOffset = 1.dpToPixelFloat
     private var enableShadow = true
     private var enableBorder = true
     private var borderHeight = 0f
+    private var borderColor = Color.BLACK
+
+    private val blurMaskFilter = BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL)
 
     // background Corner Radius
     var cornerRadius by OnChangeProp(16.dpToPixelFloat){
         updateBackground()
     }
 
-    // blurMask
-    // that's why we have used blurMaskFilter
-    private val blurMaskFilter = BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL)
+    var cardBackgroundColor by OnChangeProp(Color.WHITE){
+        updateBackground()
+    }
 
     init {
         setBackgroundColor(Color.WHITE)
         if (attrs != null) {
             getStyleableAttrs(attrs)
         }
+        updateBackground()
     }
 
     private fun getStyleableAttrs(attrs: AttributeSet) {
-        // XML상에서 app:shadowTopOffset같은걸 지정해주기 위해서 사용
         context.theme.obtainStyledAttributes(attrs, R.styleable.ShadowConstraintLayout, 0, 0).use {
             shadowTopOffset = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowTopOffset,
-                0.dpToPixelFloat
+                R.styleable.ShadowConstraintLayout_shadow_top_offset,
+                1.dpToPixelFloat
             )
             shadowBottomOffset = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowBottomOffset,
-                0.dpToPixelFloat
+                R.styleable.ShadowConstraintLayout_shadow_bottom_offset,
+                1.dpToPixelFloat
             )
             shadowStartOffset = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowStartOffset,
-                0.dpToPixelFloat
+                R.styleable.ShadowConstraintLayout_shadow_start_offset,
+                1.dpToPixelFloat
             )
             shadowEndOffset = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowEndOffset,
-                0.dpToPixelFloat
-            )
-            shadowStartY = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowStartY,
-                MIN_VALUE
+                R.styleable.ShadowConstraintLayout_shadow_end_offset,
+                1.dpToPixelFloat
             )
             shadowColor = it.getColor(
-                R.styleable.ShadowConstraintLayout_shadowColor,
+                R.styleable.ShadowConstraintLayout_shadow_color,
                 Color.BLACK
             )
             shadowStrokeWidth = it.getDimension(
-                R.styleable.ShadowConstraintLayout_shadowStrokeWidth,
+                R.styleable.ShadowConstraintLayout_shadow_stroke_width,
                 1.dpToPixelFloat
             )
             cornerRadius = it.getDimension(
-                R.styleable.ShadowConstraintLayout_cornerRadius,
+                R.styleable.ShadowConstraintLayout_corner_radius,
                 3.dpToPixelFloat
             )
             blurRadius =
-                it.getDimension(R.styleable.ShadowConstraintLayout_blurRadius, 50.dpToPixelFloat)
-            enableShadow = it.getBoolean(R.styleable.ShadowConstraintLayout_enableShadow, true)
-            enableBorder = it.getBoolean(R.styleable.ShadowConstraintLayout_enableBorder, false)
-            borderHeight = it.getDimension(R.styleable.ShadowConstraintLayout_borderHeight, 0f)
+                it.getDimension(R.styleable.ShadowConstraintLayout_blur_radius, 50.dpToPixelFloat)
+            borderColor = it.getColor(
+                R.styleable.ShadowConstraintLayout_border_color,
+                Color.BLACK
+            )
+            enableShadow = it.getBoolean(R.styleable.ShadowConstraintLayout_enable_shadow, true)
+            enableBorder = it.getBoolean(R.styleable.ShadowConstraintLayout_enable_border, false)
+            borderHeight = it.getDimension(R.styleable.ShadowConstraintLayout_border_height, 0f)
+            cardBackgroundColor = it.getColor(R.styleable.ShadowConstraintLayout_card_background_color,Color.WHITE)
         }
     }
 
     private fun updateBackground(){
-        background = MaterialShapeDrawable(ShapeAppearanceModel().withCornerSize(cornerRadius))
-    }
-
-    override fun dispatchDraw(canvas: Canvas) {
-        clipRoundCorners(canvas)
-        super.dispatchDraw(canvas)
+        background = MaterialShapeDrawable(ShapeAppearanceModel().withCornerSize(cornerRadius)).apply {
+            fillColor = ColorStateList.valueOf(cardBackgroundColor)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         if (enableShadow) {
             drawShadow(canvas)
         }
-        drawRectBackground(canvas)
         if (enableBorder) {
             drawBorder(canvas)
         }
+        drawRectBackground(canvas)
         super.onDraw(canvas)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN)
-            Toast.makeText(context, "i'm touched....", Toast.LENGTH_SHORT).show()
-        return super.onTouchEvent(event)
-    }
-
-    /**
-     * Draw shadow around your view
-     */
     private fun drawShadow(canvas: Canvas) {
         canvas.save()
-        // setup Paint
         shadowPaint.apply {
             isAntiAlias = true
             style = Paint.Style.STROKE
@@ -217,34 +193,27 @@ class ShadowConstraintLayout @JvmOverloads constructor(
             maskFilter = blurMaskFilter
         }
 
-        shadowTopOffset = 6.dpToPixelFloat
-        shadowBottomOffset = (-2).dpToPixelFloat
-        shadowStartOffset = 2.dpToPixelFloat
-        shadowEndOffset = (-2).dpToPixelFloat
-
-        // setup Path
-        shadowPath.apply {
+       /* shadowPath.apply {
             reset()
             moveTo((width + (shadowEndOffset)), shadowStartY + shadowTopOffset) // StartPosition
             lineTo((shadowStartOffset), shadowStartY + shadowTopOffset) // TR -> TL
             lineTo((shadowStartOffset), (height + shadowBottomOffset)) // TL -> BL
             lineTo((width + shadowEndOffset), (height + shadowBottomOffset)) // BL -> BR
             lineTo((width + shadowEndOffset), shadowStartY + shadowTopOffset) // BR -> TR
+        }*/
+        /*canvas.drawPath(shadowPath, shadowPaint)*/
+
+        shadowRectF.apply {
+            top = 0f - shadowTopOffset
+            left = 0f - shadowStartOffset
+            right = width - shadowEndOffset
+            bottom = height - shadowBottomOffset
         }
-        canvas.drawPath(shadowPath, shadowPaint)
+        canvas.drawRoundRect(shadowRectF,cornerRadius,cornerRadius,shadowPaint)
         canvas.restore()
-        // It means
-        // 1. Goto start Point
-        // Make a rectangle from there and at last come back from where you started
     }
 
-    /**
-     * Draw a border around the view
-     */
     private fun drawBorder(canvas: Canvas) {
-        // setup Paint , need to change
-        val borderColor = Color.BLACK
-
         borderPaint.apply {
             style = Paint.Style.STROKE
             color = borderColor
@@ -262,37 +231,11 @@ class ShadowConstraintLayout @JvmOverloads constructor(
         canvas.drawRoundRect(borderRectF, cornerRadius, cornerRadius, borderPaint)
     }
 
-    /**
-     * Clip the view with RoundCorners
-     *
-     * 기본적으로 안드로이드의 모든 뷰는 물리적으로 차지하는 영역 만큼만 그릴 수 있다.
-     * 이는 모든 view가 부모 view의 canvas를 넘겨받고, 그 canvas를 자신의 영역만큼만 clip해서 사용하기 때문
-     * 하지만 자신의 영역 밖에서 그려야 할 상황이 있다. 자신의 영역을 넘어서는 애니메이션을 돌려야 할 때 이를 가능하게 해주는게 clipChildren
-     */
-    private fun clipRoundCorners(canvas: Canvas) {
-        clipPath.reset()
-
-        clipRectF.apply {
-            top = 0f
-            left = 0f
-            right = canvas.width.toFloat()
-            bottom = canvas.height.toFloat()
-        }
-        clipPath.addRoundRect(clipRectF, cornerRadius, cornerRadius, Path.Direction.CW)
-
-        // this means we want to clip this part(defined via clipPath)of canvas
-        // And our future drawing commands must happen within the bounds of this clipPath
-        canvas.clipPath(clipPath)
-    }
-
-    /**
-     * Fill your view with white color
-     */
     private fun drawRectBackground(canvas: Canvas) {
         rectPaint.apply {
             style = Paint.Style.FILL
-            color = ContextCompat.getColor(context,R.color.real_white)
-            xfermode = porterDuffXfermode // To ensure the paint should come on top of shadow
+            color = cardBackgroundColor
+            xfermode = porterDuffXfermode
         }
 
         rectBackgroundRectF.apply {
