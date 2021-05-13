@@ -69,7 +69,6 @@ import com.kr.hkslibrary.shadowconstraintlayout.util.OnChangeProp
  * : 그 후 뭐.....원하는 cornerRadius나 blurRadius를 처리하면 끝!
  *
  * background 그리는걸 MaterialShapeAppearance로 처리를 한다면 어떨까라는 생각으로 시작합니다.
- *
  */
 class ShadowConstraintLayout @JvmOverloads constructor(
     context: Context,
@@ -93,14 +92,13 @@ class ShadowConstraintLayout @JvmOverloads constructor(
     private var shadowStrokeWidth = 4.dpToPixelFloat
 
     // values & Offset & width & height
-    private var blurRadius = 16.dpToPixelFloat // 50 is pixel
+    private var blurRadius = 16.dpToPixelFloat
     private var shadowEndOffset = 1.dpToPixelFloat
     private var shadowStartOffset = 1.dpToPixelFloat
     private var shadowTopOffset = 1.dpToPixelFloat
     private var shadowBottomOffset = 1.dpToPixelFloat
     private var enableShadow = true
     private var enableBorder = true
-    private var borderHeight = 0f
     private var borderColor = Color.BLACK
 
     private val blurMaskFilter = BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL)
@@ -177,7 +175,7 @@ class ShadowConstraintLayout @JvmOverloads constructor(
             drawBorder(canvas)
         }
         drawRectBackground(canvas)
-        super.onDraw(canvas)
+        /*super.onDraw(canvas)*/
     }
 
     private fun drawShadow(canvas: Canvas) {
